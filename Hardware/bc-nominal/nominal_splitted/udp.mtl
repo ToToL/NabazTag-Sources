@@ -24,19 +24,29 @@ fun udpSend2 mac udp=
 //	dump udp;
 	netSend udp 0 nil (MACecho mac 0 1) 0 1;;
 
+#ifdef SIMU
+#else
+
 fun udpsend local localp dst dstp content mac=
 	let mkudp local dst localp dstp content -> udp in
 	if mac!=nil then udpSend2 mac udp
 	else let dst -> ip in	//	ajouter le test de passerelle
 	arpreq ip fixarg2 #udpSend2 udp;;
 
+#endif
+
 var ludp;;
 
 fun remudp l port=
 	if l!=nil then let hd l ->[p _] in if p==port then remudp tl l port else (hd l)::remudp tl l port;;
 
+#ifdef SIMU
+#else
+
 fun regudp port cb=
 	set ludp=[port cb]::remudp ludp port;;
+
+#endif
 
 fun unregudp port=
 	set ludp=remudp ludp port;;

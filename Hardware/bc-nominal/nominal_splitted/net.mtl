@@ -20,12 +20,17 @@ fun net src mac=
 // 	buttoncheckevent; // don't understand why there should be a buttoncheckevent here, it's already in the loop !
 	0;;
 
+#ifdef SIMU
+#else
+
 fun netstart=
 	netCb #net;
 	resetarp;
 	resettcp;
 	resetudp;
 	0;;
+
+#endif
 
 fun nettime=
 	arptime;

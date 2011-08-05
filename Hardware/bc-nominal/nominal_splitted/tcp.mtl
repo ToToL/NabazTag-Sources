@@ -97,6 +97,9 @@ fun remtcp t=set t.stateT=STOFF; set ltcp=remfromlist ltcp t;;
 
 var counttcp;;
 
+#ifdef SIMU
+#else
+
 fun opentcp local localp dst dstp cb=
 	let if localp==nil then 1024+set counttcp=((if counttcp==nil then time_ms else counttcp)+1)&16383 else localp -> localp in
 	let [stateT:STSYN locT:local dstT:dst locpT:localp dstpT:dstp seqT:CLIENT_SEQ_START ackT:CLIENT_SEQ_NULL cbT:cb enableT:1] -> tcp in
@@ -107,6 +110,8 @@ fun opentcp local localp dst dstp cb=
 		arpreq ip fixarg2 fixarg3 #tcpSend2 trame tcp;
 		tcp
 	);;
+
+#endif
 
 fun listentcp localp cb=
 	let [stateT:STLISTEN locpT:localp cbT:cb enableT:1] -> tcp in
@@ -228,6 +233,8 @@ fun cbnettcp src mac=
 			)
 	;;
 
+#ifdef SIMU
+#else
 
 fun writetcp t msg i=
 	if t.stateT!=STEST then nil
@@ -249,7 +256,10 @@ fun writetcp t msg i=
 		)
 	);;
 
+#endif
 
+#ifdef SIMU
+#else
 fun closetcp t=
 	if t.stateT!=STEST then 0
 	else if t.lastsentT!=nil then
@@ -259,6 +269,8 @@ fun closetcp t=
 	)
 	else sendclose t;
 	0;;
+
+#endif
 
 fun tcpcb t cb= set t.cbT=cb;;
 
