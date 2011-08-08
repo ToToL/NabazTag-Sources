@@ -2077,7 +2077,7 @@ proto xmpps_createStanza 5;;
  * Appelle XmppTcpOpen sur le port 5222
  */
 fun XmppTcpOpen5222 ip xSession =
-		XmppTcpOpen ip 5222 xSession
+		XmppTcpOpen ip 5223 xSession
 ;;
 
 /* 
