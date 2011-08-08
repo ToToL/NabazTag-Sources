@@ -113,6 +113,7 @@ void my_printf(e_logtypes t, const char *fmt, ...)
 
 	int len, nbwritten;
 
+	fflush(outstream);
 	if (0==((int)t & my_msk))
 		return;
 
@@ -147,6 +148,7 @@ void my_printf(e_logtypes t, const char *fmt, ...)
 			siml=0;
 			siml_idx=0;
 		}
+	fflush(outstream);
 }
 
 /**

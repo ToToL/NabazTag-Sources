@@ -36,3 +36,4 @@ mtl_simu : vcomp/libvcomp.a $(COMMON_OBJS) $(SIMU_OBJS)
 clean :
 	$(MAKE) -C vcomp clean
 	rm -f $(COMMON_OBJS) $(COMP_OBJS) $(SIMU_OBJS)
+	rm -rf foo.bin mtl_simu mtl_comp 
