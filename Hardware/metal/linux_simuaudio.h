@@ -15,4 +15,7 @@ void audioSetVolume(int vol);
 int simuaudioinit();
 
 
+void simuFetchStart();
+int simuFetchPlay(void);
+int simuFetch(void);
 #endif // ! MY_SIMUAUDIO_H_

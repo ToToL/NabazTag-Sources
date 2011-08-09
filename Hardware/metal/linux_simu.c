@@ -46,6 +46,7 @@ void simuSetMotor(vub i,vub val){}
 #include<stdlib.h>
 #include<string.h>
 #include<time.h>
+#include <ncurses.h>
 
 #include "linux_simuaudio.h"
 #include "linux_simunet.h"
@@ -96,6 +97,7 @@ void colortabInit()
 // pouvoir séparer chacune des composantes rgb de la couleur de chaque
 // led
 int diodeval[NBLED];
+WINDOW * window_local;
 #ifdef VL_MOTORS
 int motorval[NBMOTOR];
 int motorcount[NBMOTOR];
@@ -142,13 +144,106 @@ int diodergb[NBLED]=
 // TODO
 int getButton() { return 0; }
 
+int select_color(int a,int b,int c){
+	int i;
+int color[7][3]= {{255,255,255},
+	{0,0,0},
+	{255,0,0},
+	{0,0,255},
+	{0,255,0},
+	{255,128,0},
+	{255,0,255}};
+	if ( a - 128 > 64 )
+		a = 255;
+	else if ( a - 128 > 0 || a - 192 > -64 )
+		a = 128;
+	else
+		a=0;
+	if ( b - 128 > 64 )
+		b = 255;
+	else if ( b - 128 > 0 || b - 192 > -64 )
+		b = 128;
+	else
+		b=0;
+	if ( c - 128 > 64 )
+		c = 255;
+	else if ( c - 128 > 0 || c - 192 > -64 )
+		c = 128;
+	else
+		c=0;
+	for ( i = 0; i < 7; i++ ) {
+		if ( a == color[i][0] && b == color[i][1] && c == color[i][2] ) {
+			return i+1;
+		}
+	}
+	return 8;
+}
+
 // fonction d'affichage des diodes
 int simuDisplay(int* intensity)
 {
-	// TODO afficher l'état du lapin
+    int startx = 50 / 2 - 30 / 2;
+    int starty = 2;
+mvwprintw(window_local,starty+0,startx,"     \\\\     ______    //      "); 
+mvwprintw(window_local,starty+1,startx,"      \\\\   /      \\  //       ");
+mvwprintw(window_local,starty+2,startx,"       \\\\ /        \\//        ");
+mvwprintw(window_local,starty+3,startx,"         /          \\         ");
+mvwprintw(window_local,starty+4,startx,"        /    ");
+wattron(window_local,COLOR_PAIR(select_color(diodeval[3*0],diodeval[3*0+1],diodeval[3*0+2])));
+wprintw(window_local,"   ");
+wattroff(window_local,COLOR_PAIR(select_color(diodeval[3*0],diodeval[3*0+1],diodeval[3*0+2])));
+wprintw(window_local,"     \\        ");
+mvwprintw(window_local,starty+5,startx,"       /              \\       ");
+mvwprintw(window_local,starty+6,startx,"      /                \\      ");
+mvwprintw(window_local,starty+7,startx,"     /                  \\     ");
+mvwprintw(window_local,starty+8,startx,"    /                    \\    ");
+mvwprintw(window_local,starty+9,startx,"   /  ");
+wattron(window_local,COLOR_PAIR(select_color(diodeval[3*1],diodeval[3*1+1],diodeval[3*1+2])));
+wprintw(window_local,"   ");
+wattroff(window_local,COLOR_PAIR(select_color(diodeval[3*1],diodeval[3*1+1],diodeval[3*1+2])));
+wprintw(window_local,"    ");
+wattron(window_local,COLOR_PAIR(select_color(diodeval[3*2],diodeval[3*2+1],diodeval[3*2+2])));
+wprintw(window_local,"   ");
+wattroff(window_local,COLOR_PAIR(select_color(diodeval[3*2],diodeval[3*2+1],diodeval[3*2+2])));
+wprintw(window_local,"     ");
+wattron(window_local,COLOR_PAIR(select_color(diodeval[3*3],diodeval[3*3+1],diodeval[3*3+2])));
+wprintw(window_local,"   ");
+wattroff(window_local,COLOR_PAIR(select_color(diodeval[3*3],diodeval[3*3+1],diodeval[3*3+2])));
+wprintw(window_local,"  \\   ");
+mvwprintw(window_local,starty+10,startx,"  /                        \\  ");
+mvwprintw(window_local,starty+11,startx," /                          \\ ");
+mvwprintw(window_local,starty+12,startx,"------------------------------");
+mvwprintw(window_local,starty+13,startx,"            ");
+wattron(window_local,COLOR_PAIR(select_color(diodeval[3*4],diodeval[3*4+1],diodeval[3*4+2])));
+wprintw(window_local,"     ");
+wattroff(window_local,COLOR_PAIR(select_color(diodeval[3*4],diodeval[3*4+1],diodeval[3*4+2])));
+mvwprintw(window_local,starty+16,startx,"couleur nez : %03d, %03d, %03d",diodeval[3*0],diodeval[3*0+1],diodeval[3*0+2]);
+mvwprintw(window_local,starty+17,startx,"couleur gauche : %03d, %03d, %03d",diodeval[3*1],diodeval[3*1+1],diodeval[3*1+2]);
+mvwprintw(window_local,starty+18,startx,"couleur milieu : %03d, %03d, %03d",diodeval[3*2],diodeval[3*2+1],diodeval[3*2+2]);
+mvwprintw(window_local,starty+19,startx,"couleur droit : %03d, %03d, %03d",diodeval[3*3],diodeval[3*3+1],diodeval[3*3+2]);
+mvwprintw(window_local,starty+20,startx,"couleur base : %03d, %03d, %03d",diodeval[3*4],diodeval[3*4+1],diodeval[3*4+2]);
+    wrefresh(window_local);
 	return 0;
 }
 
+int simuDisplayInit(void) {
+    initscr();
+    start_color();
+    init_pair(1, COLOR_BLACK, COLOR_WHITE);
+    init_pair(2, COLOR_BLACK, COLOR_BLACK);
+    init_pair(3, COLOR_BLACK, COLOR_RED);
+    init_pair(4, COLOR_BLACK, COLOR_BLUE);
+    init_pair(5, COLOR_BLACK, COLOR_GREEN);
+    init_pair(6, COLOR_BLACK, COLOR_YELLOW);
+    init_pair(7, COLOR_BLACK, COLOR_MAGENTA);
+    init_pair(8, COLOR_BLACK, COLOR_CYAN);
+    noecho();
+    cbreak();
+    window_local = newwin(30, 50, 0, 0);
+    refresh();
+    box(window_local,0,0);
+    return 0;
+}
 
 // initialisation du simulateur
 vsd simuInit()
@@ -156,7 +251,7 @@ vsd simuInit()
 	int i;
 	colortabInit();
 
-	for(i=0;i<NBLED;i++) diodeval[i]=255;
+	for(i=0;i<NBLED*3;i++) diodeval[i]=255;
 	srand(clock());
 #ifdef VL_MOTORS
 	for(i=0;i<NBMOTOR;i++)
@@ -174,6 +269,7 @@ vsd simuInit()
 //	setButton(1);
 	simuaudioinit();
 	simunetinit();
+	simuDisplayInit();
 	return 0;
 }
 
@@ -209,6 +305,7 @@ vsd simuDoLoop()
 void checkAllEvents(void)
 {
 	checkNetworkEvents();
+	 simuFetch();
 }
 
 

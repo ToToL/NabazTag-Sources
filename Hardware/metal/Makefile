@@ -24,7 +24,7 @@ mtl_comp : vcomp/libvcomp.a $(COMMON_OBJS) $(COMP_OBJS)
 #	g++  $^ -o $@ vcomp/*.o
 
 mtl_simu : vcomp/libvcomp.a $(COMMON_OBJS) $(SIMU_OBJS)
-	g++  $^ -o $@ vcomp/libvcomp.a
+	g++  $^ -o $@ vcomp/libvcomp.a -lncurses
 #	g++  $^ -o $@ vcomp/*.o
 
 # .c.o:	
