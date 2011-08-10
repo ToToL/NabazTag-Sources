@@ -91,6 +91,4 @@ int PlayStart()
 	A();
 	PlayState=PLAYST_START;
 	PlayStateEof=0;
-	bufplaystart=0;
-	bufplayout_i=0;
 }

@@ -1106,8 +1106,8 @@ fun netstart=
 	set ltcp=nil;
 	set ludp=nil;
 //	set wifi=stationW;
-	addnewdns "\192\168\0\24" 1;
-	set netip="\192\168\0\24";
+	addnewdns "\192\168\1\1" 1;
+	set netip="\127\0\0\1";
 	0;;
 // end of file tcpudp_emu.mtl //
 // back to file STDIN, line 87
