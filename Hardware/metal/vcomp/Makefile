@@ -1,5 +1,6 @@
-OBJS = \
-	bootstrap.o \
+CXX=g++
+CXXFLAGS=
+OBJS = 	bootstrap.o \
 	compiler_file.o \
 	compiler.o \
 	compiler_prog.o \
@@ -16,12 +17,14 @@ OBJS = \
 	terminal.o \
 	util.o
 
+all: clean libvcomp.a
+
 libvcomp.a : $(OBJS)
 	ar rcs $@ $(OBJS)
 	ranlib $@
 
-# %.o : %.cpp
-# 	g++ -c $^ -o $@
+%.o : %.cpp
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
 clean :
-	rm $(OBJS)
+	rm -f $(OBJS) libvcomp.a
