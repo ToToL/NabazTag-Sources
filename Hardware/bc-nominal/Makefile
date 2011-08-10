@@ -1,6 +1,7 @@
 NOMINAL_DIR=nominal_splitted
 
-all: bootc nominal_simu.mtl
+all:
+	cd ${NOMINAL_DIR} && ${MAKE} bootc
 
 nominal.mtl:
 	cd ${NOMINAL_DIR} && ${MAKE} $@
@@ -8,7 +9,7 @@ nominal.mtl:
 nominal_simu.mtl:
 	cd ${NOMINAL_DIR} && ${MAKE} $@
 
-bootc: nominal.mtl compileur
+bootc:
 	cd ${NOMINAL_DIR} && ${MAKE} $@
 
 compileur:
