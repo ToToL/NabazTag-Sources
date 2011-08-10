@@ -1,4 +1,4 @@
-NOMINAL_DIR=nominal_splitted
+NOMINAL_DIR=src
 
 all:
 	cd ${NOMINAL_DIR} && ${MAKE} bootc

@@ -1,5 +1,5 @@
-PREPROC="../preproc.pl"
-PREPROC2="../preproc_remove_extra_protos.pl"
+PREPROC="../utils/preproc.pl"
+PREPROC2="../utils/preproc_remove_extra_protos.pl"
 COMPILER_DIR="../../metal"
 COMPILER="mtl_comp"
 
