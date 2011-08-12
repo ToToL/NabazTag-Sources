@@ -83,7 +83,7 @@ int StartMetal(const char *starter, const char* output, bool inSign)
 
 int vcompDoit(char *starter)
 {
-	int k=StartMetal(starter, "foo.bin", false);
+	int k=StartMetal(starter, "Simu_Work/bootc_simu", false);
 	getchar();
 	return k;
 }

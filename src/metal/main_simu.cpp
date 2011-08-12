@@ -10,6 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <fcntl.h>
 extern "C" {
 #include"vmem.h"
 #include"vloader.h"
@@ -31,7 +32,7 @@ void simuSetMotor(int i,int val);
 }
 
 int handle_options(int argc, char **argv);
-void usage();
+void usage(char * bin_name);
 
 
 char srcbytecode[MAXSIZE_BYTECODE];
@@ -94,16 +95,46 @@ extern unsigned char dumpbc[];
 
 int main(int argc,char **argv)
 {
-	PropLoad("config.txt");
+
+	int filename;
+
+	if ( access ( "Simu_Work" , F_OK ) == -1 ) {
+		printf("Dossier Simu_Work introuvable.\n");
+		return 1;
+	}
+
+	if ( access ("Simu_Work/config_simu.txt" , F_OK ) == -1 ) {
+		printf("Fichier Simu_Work/config_simu.txt introuvable.\n");
+		return 1;
+	}
+	
+	if ( access ("Simu_Work/nominal_simu.mtl" , F_OK ) == -1 ) {
+		printf("Fichier Simu_Work/nominal_simu.mtl introuvable.\n");
+		return 1;
+	}
+	
+	if ( access ("Simu_Work/conf.bin" , F_OK ) == -1 ) {
+		printf("Fichier Simu_Work/conf.bin introuvable.\n");
+		return 1;
+	}
+
+	PropLoad("Simu_Work/config_simu.txt");
 
 	if (!handle_options(argc, argv))
 		return -1;
 
 	PropDump();
 
+	filename = open("Simu_Work/conf.bin", O_WRONLY );
+	write(filename,"-----------------------------------------",41);
+	lseek(filename,0,SEEK_SET);
+	write(filename,PropGet("URL"),sizeof(char)*strlen(PropGet("URL")));
+	write(filename,"\0",sizeof(char));
+	close(filename);
+
 	if (!vcompDoit(PropGet("SOURCE")))
 	{
-		loadbytecode("foo.bin");
+		loadbytecode("Simu_Work/bootc_simu");
 
 		vmemInit(0);
 
@@ -159,45 +190,49 @@ int handle_options(int argc, char **argv)
 
 	while (i<argc) {
 		if (!strcmp(argv[i], "--help")) {
-			usage();
+			usage(argv[0]);
 			res=0;
 			break;
 		} else if (!strcmp(argv[i], "--mac")) {
 			++i;
-			if (i>=argc) { usage(); return 0; }
+			if (i>=argc) { usage(argv[0]); return 0; }
 			PropSet("MAC", argv[i]);
 		} else if (!strcmp(argv[i], "--boot")) {
 			PropSet("BOOT", "firmware");
 		} else if (!strcmp(argv[i], "--source")) {
 			++i;
-			if (i>=argc) { usage(); return 0; }
+			if (i>=argc) { usage(argv[0]); return 0; }
 			PropSet("SOURCE", argv[i]);
 		} else if (!strcmp(argv[i], "--logs")) {
 			++i;
-			if (i>=argc) { usage(); return 0; }
-			my_printf_set_options(argv[i]);
+			if (i>=argc) { usage(argv[0]); return 0; }
+			PropSet("LOGS",argv[i]);
 		} else if (!strcmp(argv[i], "--logfile")) {
 			++i;
-			if (i>=argc) { usage(); return 0; }
-			if (my_printf_set_logfile(argv[i]))
-				{ res=0; break; }
+			if (i>=argc) { usage(argv[0]); return 0; }
+			PropSet("LOGFILE",argv[i]);
 		} else if (!strcmp(argv[i], "--maxlogsize")) {
 			++i;
-			if (i>=argc || !my_is_number(argv[i])) { usage(); return 0; }
-			my_printf_set_max_log_size(atoi(argv[i]));
+			if (i>=argc || !my_is_number(argv[i])) { usage(argv[0]); return 0; }
+			PropSet("MAXLOGSIZE",argv[i]);
 		} else if (!strcmp(argv[i], "--maxlogtime")) {
 			++i;
-			if (i>=argc || !my_is_number(argv[i])) { usage(); return 0; }
-			my_printf_set_max_log_time(atoi(argv[i]));
+			if (i>=argc || !my_is_number(argv[i])) { usage(argv[0]); return 0; }
+			PropSet("MAXLOGTIME",argv[i]);
 		} else if (!strcmp(argv[i], "--dologtime")) {
-			my_printf_set_do_log_time(1);
+			PropSet("DOLOGTIME","1");
 		} else {
-			usage();
+			usage(argv[0]);
 			res=0;
 			break;			
 		}
 		++i;
 	}
+	my_printf_set_options(PropGet("LOGS"));
+	my_printf_set_logfile(PropGet("LOGFILE"));
+	my_printf_set_max_log_size(atoi(PropGet("MAXLOGSIZE")));
+	my_printf_set_max_log_time(atoi(PropGet("MAXLOGTIME")));
+	my_printf_set_do_log_time(atoi(PropGet("DOLOGTIME")));
 
 	return res;
 }
@@ -205,17 +240,18 @@ int handle_options(int argc, char **argv)
 /**
 	 Affiche les options disponibles pour le logiciel
  */
-void usage()
+void usage(char * bin_name)
 {
-	printf("Usage: mtl_simy [--help] [--mac MACADDR] [--boot] [--source SOURCE]\n" \
-				 "          --help: affiche cette aide et quitte\n" \
-				 "          --mac MACADDR: permet de preciser une adresse mac pour le lapin\n" \
-				 "          --boot: comme si on mettait \"BOOT firmware\" dans config.txt\n" \
-				 "          --source SOURCE: compile et charge le bytecode present dans le fichier SOURCE\n" \
-				 "          --logs <log1>,...,<logn>: specifie les types de logs qu'on veut afficher, entre init,vm,simunet,simuleds et simuaudio, separes par des virgules\n" \
-				 "          --logfile <filename>: specifie le fichier dans lequel ecrire les logs du lapin\n" \
-				 "          --maxlogsize <n>: specifie qu'un fichier de log ne peut depasser <n> octets\n" \
-				 "          --maxlogtime <n>: specifie qu'il doit y avoir une rotation du fichier de log au moins toutes les <n> secondes\n" \
-				 "          --dologtime: specifie qu'on doit afficher sur chaque ligne de log le nombre de secondes ecoulees depuis le lancement du simulateur\n" \
-				 "Toutes les options sont prioritaires sur les valeurs contenues dans config.txt\n");
+	printf("Usage: %s [--help] [--mac MACADDR] [--boot] [--source SOURCE]\n" \
+	       "          --help: affiche cette aide et quitte\n" \
+	       "          --mac MACADDR: permet de preciser une adresse mac pour le lapin\n" \
+	       "          --boot: comme si on mettait \"BOOT firmware\" dans config.txt\n" \
+	       "          --source SOURCE: compile et charge le bytecode present dans le fichier SOURCE\n" \
+	       "          --logs <log1>,...,<logn>: specifie les types de logs qu'on veut afficher\n" \
+	       "                Possibilites : init, vm, simunet, simuleds, simuaudio\n" \
+	       "          --logfile <filename>: specifie le fichier dans lequel ecrire les logs du lapin\n" \
+	       "          --maxlogsize <n>: specifie qu'un fichier de log ne peut depasser <n> octets\n" \
+	       "          --maxlogtime <n>: specifie qu'il doit y avoir une rotation du fichier de log au moins toutes les <n> secondes\n" \
+	       "          --dologtime: specifie qu'on doit afficher sur chaque ligne de log le nombre de secondes ecoulees depuis le lancement du simulateur\n" \
+	       "Toutes les options sont prioritaires sur les valeurs contenues dans config.txt\n", bin_name);
 }

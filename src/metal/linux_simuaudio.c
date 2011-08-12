@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 
 #include "log.h"
 
@@ -52,8 +53,10 @@ int simuaudioinit()
 void simuFetchStart()
 {
 	my_printf(LOG_SIMUAUDIO,"START\n");
-	system("rm -f /tmp/toto.mp3");
-	printmp3 = fopen("/tmp/toto.mp3","a+");
+	if ( access ( "Simu_Work/mp3" , F_OK ) != -1 )
+		system("rm -rf Simu_Work/mp3");
+	system("mkdir Simu_Work/mp3");
+	printmp3 = fopen("Simu_Work/mp3/son.mp3","a+");
 	PlayType=PLAYTYPE_MP3;
 	my_printf(LOG_SIMUAUDIO,"Detect MP3\n");
 	PlayState=PLAYST_PLAY;
