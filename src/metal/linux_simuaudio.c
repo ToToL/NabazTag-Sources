@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <time.h>
+#include <sys/stat.h>
 
 #include "log.h"
 
@@ -52,11 +54,25 @@ int simuaudioinit()
 
 void simuFetchStart()
 {
+	time_t tii;
+	struct tm * ti;
+	char buff[512];
+
 	my_printf(LOG_SIMUAUDIO,"START\n");
+
 	if ( access ( "Simu_Work/mp3" , F_OK ) != -1 )
 		system("rm -rf Simu_Work/mp3");
-	system("mkdir Simu_Work/mp3");
-	printmp3 = fopen("Simu_Work/mp3/son.mp3","a+");
+	mkdir("Simu_Work/mp3", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+       	tii = time(NULL);
+       	ti = localtime(&tii);
+       	sprintf(buff,"Simu_Work/%d%d%d%d%d%d.mp3",ti->tm_year,
+                                                 ti->tm_mon,
+                                                 ti->tm_mday,
+                                                 ti->tm_hour,
+                                                 ti->tm_min,
+                                                 ti->tm_sec);
+       	free(ti);
+       	printmp3 = fopen(buff,"a+");
 	PlayType=PLAYTYPE_MP3;
 	my_printf(LOG_SIMUAUDIO,"Detect MP3\n");
 	PlayState=PLAYST_PLAY;
