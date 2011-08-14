@@ -19,10 +19,10 @@
 
 #include"../vbc_str.h"
 
-void displaybc(Memory* m,char* p)
+void displaybc(Memory* m,const char* p)
 {
 	PRINTF(m)(LOG_DEVCORE,"dump %x\n",p);
-	char* spaces="         ";
+	const char* spaces="         ";
 	int ind=0;
 	while(1)
 	{

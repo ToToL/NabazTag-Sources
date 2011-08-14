@@ -90,10 +90,10 @@ public:
 	void stackset(int* p,int val);
 
 
-	int* storestring(char* src);
+	int* storestring(const char* src);
 	int* storebinary(char* src,int size);
 	int* storenosrc(int size);
-	int pushstring(char* src);
+	int pushstring(const char* src);
 	int pushbinary(char* src,int size);
 	int pushnosrc(int size);
 	int pushpnt(void* pnt);
@@ -101,7 +101,7 @@ public:
 	int deftab(int size);
 
 	void listing();
-	char* errorname(int err);
+	const char* errorname(int err);
 	void dump();
 };
 
@@ -298,7 +298,7 @@ inline int Memory::pushmallocClear(int size)
 	return push(PNTTOVAL(p));
 }
 
-inline int Memory::pushstring(char* src)
+inline int Memory::pushstring(const char* src)
 {
 	int* p=storestring(src); if (!p) return MTLERR_OM;
 	return push(PNTTOVAL(p));

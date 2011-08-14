@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <stdlib.h>
 
 #include "log.h"
 

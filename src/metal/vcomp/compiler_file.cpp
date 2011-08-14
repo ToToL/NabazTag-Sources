@@ -135,7 +135,7 @@ int Compiler::gocompile(int type)
 	else
 	{
 		parser=new Parser(m->term,name);
-		name="...";
+		strcpy(name,"...");
 		PRINTF(m)(LOG_COMPILER,"Compiler : compiling string buffer\n");
 	}
 
@@ -370,7 +370,7 @@ int Compiler::parseifdef(int ifndef)
 	return 0;
 }
 
-void displaybc(Memory* m,char* src);
+void displaybc(Memory* m,const char* src);
 
 
 // compilation d'une fonction

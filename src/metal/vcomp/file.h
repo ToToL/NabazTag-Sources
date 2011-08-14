@@ -27,11 +27,11 @@ public:
 	File(FileSystem *fs);
 	~File();
 
-	int openread(char* name);
+	int openread(const char* name);
 	char* getcontent(int *size);
 
-	int openwrite(char* name);
-	int write(char* outbuf,int size);
+	int openwrite(const char* name);
+	int write(const char* outbuf,int size);
 
 	int close();
 

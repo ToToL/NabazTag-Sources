@@ -194,7 +194,7 @@ Parser::Parser(Terminal* t,FileSystem* fs,char *filename)
 	token=NULL;
 }
 
-Parser::Parser(Terminal* t,char *buf)
+Parser::Parser(Terminal* t,const char *buf)
 {
 	srcname=NULL;
 	term=t;

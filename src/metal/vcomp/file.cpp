@@ -40,7 +40,7 @@ int File::close()
 }
 
 
-int File::openread(char* name)
+int File::openread(const char* name)
 {
 	file=fopen(name,"rb");
 	if (file) return 0;
@@ -62,13 +62,13 @@ char* File::getcontent(int *size)
 	close();
 	return buffer;
 }
-int File::openwrite(char* name)
+int File::openwrite(const char* name)
 {
 	file=fopen(name,"wb");
 	if (file) return 0;
 	return -1;
 }
-int File::write(char *outbuf,int size)
+int File::write(const char *outbuf,int size)
 {
 	if (file==NULL) return 0;
 

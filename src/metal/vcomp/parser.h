@@ -46,7 +46,7 @@ private :
 public :
 	char* token;
 	Parser(Terminal* t,FileSystem* fs,char *filename);
-	Parser(Terminal* t,char *buffer);
+	Parser(Terminal* t,const char *buffer);
 	~Parser();
 
 	char* next(int filter);
@@ -54,8 +54,8 @@ public :
 
 	void echoposition();
 
-	int parsekeyword(char* keyword);
-	int parsekeyword(char* keyword,int filter);
+	int parsekeyword(const char* keyword);
+	int parsekeyword(const char* keyword,int filter);
 	int getstring(Memory* m,char separator);
 };
 
