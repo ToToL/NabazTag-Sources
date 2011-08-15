@@ -1,13 +1,13 @@
 # Makefile pour le compilateur de mtl.
-COMMON_OBJS=properties.o dumpbc.o log.o
+COMMON_OBJS=properties.o log.o
 
 COMP_OBJS=main_compiler.o
 
 SIMU_SRC=main_simu.c linux_simu.c linux_simuaudio.c linux_simunet.c vmem.c vloader.c vlog.c vinterp.c vaudio.c vnet.c
 SIMU_OBJS=$(SIMU_SRC:.c=.o)
 
-CXXFLAGS=-DVSIMU -g
-CFLAGS=-DVSIMU -g 
+CXXFLAGS=-g
+CFLAGS=-g 
 
 CC=gcc
 CXX=g++

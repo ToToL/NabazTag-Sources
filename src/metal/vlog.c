@@ -5,42 +5,10 @@
 
 #include"vmem.h"
 #include"vloader.h"
-#ifdef VSIMU
 #include <stdlib.h>
 #include<stdio.h>
 #include<time.h>
 #include <sys/time.h>
-#endif
-#ifdef VREAL
-#include "ML674061.h"
-#include "common.h"
-#include "irq.h"
-#include "spi.h"
-#include "led.h"
-#include "mem.h"
-#include "uart.h"
-#include "debug.h"
-#include "usbh.h"
-
-#include "delay.h"
-#include "audio.h"
-#include "motor.h"
-#include "usbctrl.h"
-#include "ml60842.h"
-#include "hcdmem.h"
-#include "hcd.h"
-#include "inarm.h"
-#include "i2c.h"
-#include "rt2501usb.h"
-#include "mem.h"
-#include<stdio.h>
-#include<string.h>
-
-#include"led.h"
-#include"motor.h"
-#include"delay.h"
-#include"rfid.h"
-#endif
 #include"vlog.h"
 
 void logSecho(int p,int nl)
@@ -77,7 +45,6 @@ void logGC()
 
 int sysLoad(char *dst,int i,int ldst,char *filename,int j,int len)
 {
-#ifdef VSIMU
 	FILE *f;
 	if ((j<0)||(i<0)||(len<=0)) return 0;
 	if (i+len>ldst) len=ldst-i;
@@ -88,20 +55,6 @@ int sysLoad(char *dst,int i,int ldst,char *filename,int j,int len)
 	len=fread(dst,1,len,f);
 	fclose(f);
 	return len;
-#endif
-#ifdef VREAL
-/*        set_vlsi_volume(0);          //volume on 8bits, 0x00 => maximum
-        encode_adpcm((UBYTE*)dst+i,(ldst-i-256)>>8, j);
-        return 0;
-*/
-	if ((j<0)||(i<0)||(len<=0)) return 0;
-	if (i+len>ldst) len=ldst-i;
-	if (len<=0) return 0;
-	if (j+len>4096) len=4096-j;
-	if (len<=0) return 0;
-        read_uc_flash(j,(unsigned char*)dst,len);
-        return len;
-#endif
 }
 
 uchar buffer_temp[4096];
@@ -109,7 +62,6 @@ uchar buffer_temp[4096];
 // pour le firmware, le "fichier" ouvert est toujours l'eeprom
 int sysSave(char *dst,int i,int ldst,char *filename,int j,int len)
 {
-#ifdef VSIMU
 	FILE *f;
 	if ((j<0)||(i<0)||(len<=0)) return 0;
 	if (i+len>ldst) len=ldst-i;
@@ -121,18 +73,6 @@ int sysSave(char *dst,int i,int ldst,char *filename,int j,int len)
 	len=fwrite(dst,1,len,f);
 	fclose(f);
 	return len;
-#endif
-#ifdef VREAL
-	if ((j<0)||(i<0)||(len<=0)) return 0;
-	if (i+len>ldst) len=ldst-i;
-	if (len<=0) return 0;
-	if (j+len>4096) len=4096-j;
-	if (len<=0) return 0;
-  __disable_interrupt();
-        write_uc_flash(j,(unsigned char*)dst,len,buffer_temp);
-  __enable_interrupt();
-        return len;
-#endif
 }
 
 static int firstTimeSet = 0;
@@ -140,7 +80,6 @@ static struct timeval firstTime;
 
 int sysTimems()
 {
-#ifdef VSIMU
 	int res;
 	struct timeval tv;
 	if (firstTimeSet) {
@@ -153,15 +92,10 @@ int sysTimems()
 		res = 0;
 	}
 	return res;
-#endif // ! VSIMU
-#ifdef VREAL
-        return counter_timer;
-#endif
 }
 
 int sysTime()
 {
-#ifdef VSIMU
 	int res;
 	static int firstTimeSet = 0;
 	static struct timeval firstTime;
@@ -176,10 +110,6 @@ int sysTime()
 		res = 0;
 	}
 	return res;
-#endif
-#ifdef VREAL
-	return counter_timer_s;
-#endif
 }
 
 
@@ -435,29 +365,12 @@ char* get_rfid();
 
 void sysLed(int led,int col)
 {
-#ifdef VSIMU
 	simuSetLed(led,col);
-#endif
-#ifdef VREAL
-        set_led((UWORD)led,(UWORD)col);
-#endif
 }
 
 void sysMotorset(int motor,int sens)
 {
-#ifdef VSIMU
 	set_motor_dir(motor,sens);
-#endif
-#ifdef VREAL
-//        char buffer[256];
-        motor=1+(motor&1);
-
-//        sprintf(buffer,"setmotor %d sens %d\r\n",motor,sens);
-//        consolestr(buffer);
-
-        if (sens==0) stop_motor(motor);
-        else run_motor(motor,255,(sens>0)?REVERSE:FORWARD/*:REVERSE*/);
-#endif
 }
 
 int kmotor[3];
@@ -465,85 +378,37 @@ int kvmotor[3];
 
 int sysMotorget(int motor)
 {
-#ifdef VSIMU
 	return get_motor_val(motor);
-#endif
-#ifdef VREAL
-//        char buffer[256];
-        int k,kx;
-        motor=1+(motor&1);
-        kx=(int)get_motor_position(motor);
-/*        k=(int)get_motor_position(motor);
-        if (kmotor[motor]!=k)
-        {
-          kmotor[motor]=k;
-          kvmotor[motor]++;
-        }
-        kx=kvmotor[motor];
-*/
-
-//        sprintf(buffer,"getmotor %d pos %x / %x\r\n",motor,k,kx);
-//        if(motor==2)
-//        consolestr(buffer);
-        return kx;
-#endif
 }
 
 int sysButton2()
 {
-#ifdef VSIMU
 	return getButton();
-#endif
-#ifdef VREAL
-        return push_button_value();
-#endif
 }
 
 int sysButton3()
 {
-#ifdef VSIMU
 	return get_button3();
-#endif
-#ifdef VREAL
-	return 255-get_adc_value();
-#endif
 }
 
 char* sysRfidget()
 {
-#ifdef VSIMU
         return get_rfid();
-#endif
-#ifdef VREAL
-        return get_rfid_first_device();
-#endif
 }
 
 void sysReboot()
 {
-#ifdef VSIMU
     printf("REBOOT NOW.....");
     getchar();
     exit(0);
-#endif
-#ifdef VREAL
-    reset_uc();
-#endif
 
 }
 
 void sysFlash(char* firmware,int len)
 {
-#ifdef VSIMU
     printf("REBOOT AND FLASH NOW.....");
     getchar();
     exit(0);
-#endif
-#ifdef VREAL
-  __disable_interrupt();
-  flash_uc((unsigned char*)firmware,len,buffer_temp);
-#endif
-
 }
 
 const uchar inv8[128]=

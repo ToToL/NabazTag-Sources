@@ -6,18 +6,10 @@
 
 #include "log.h"
 
-#ifdef VSIMU
 #define consolestr(val) my_printf(LOG_VM, "%s",val)
 #define consolebin(val,len) my_printf(LOG_VM, "%s",val)
 #define consoleint(val) my_printf(LOG_VM, "%d",val)
 #define consolehx(val) my_printf(LOG_VM, "%x",val)
-#endif
-#ifdef VREAL
-#define consolestr(val) putst_uart(val)
-#define consolebin(val,len) putbin_uart(val,len)
-#define consoleint(val) putint_uart(val)
-#define consolehx(val) puthx_uart(val)
-#endif
 
 void logSecho(int p,int nl);
 void logIecho(int i,int nl);

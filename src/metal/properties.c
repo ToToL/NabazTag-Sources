@@ -210,7 +210,7 @@ prop propNext(prop pnt)
 
 // charge un fichier de prop
 // retourne un pointeur vers la structure prop du dernier champ
-prop propLoad(char *file)
+prop propLoad(const char *file)
 {
 	prop pnt=NULL;	// pointeur vers la property en construction
 	char* src=fileLoad(file);
@@ -234,7 +234,7 @@ void propDump(prop pnt)
 
 
 // retourne la valeur d'un champ
-char* propGet(prop pnt,char *field)
+char* propGet(prop pnt,const char *field)
 {
 	while(pnt)
 	{
@@ -245,27 +245,27 @@ char* propGet(prop pnt,char *field)
 }
 
 // retourne la valeur entière d'un champ
-int propGetInt(prop pnt,char *field)
+int propGetInt(prop pnt,const const char *field)
 {
 	char *p=propGet(pnt,field);
 	if ((p[0]=='0')&&((p[1]=='x')||(p[1]=='X'))) return htoi(p+2);
 	return atoi(p);
 }
 
-int PropLoad(char* file)
+int PropLoad(const char* file)
 {
 	Properties=propLoad(file);
 	return 0;
 }
 
 // retourne la valeur d'un champ
-char* PropGet(char *field)
+char* PropGet(const char *field)
 {
 	return propGet(Properties,field);
 }
 
 // retourne la valeur entière d'un champ
-int PropGetInt(char *field)
+int PropGetInt(const char *field)
 {
 	return propGetInt(Properties,field);
 }

@@ -1,178 +1,64 @@
-#define PROTORABBIT
-//#define PROTODAL
-
-// commenter la ligne suivante pour la version windows
-//#define VMICROCHIP
-
-typedef unsigned char uchar;
-typedef unsigned long ulong;
-
-#define vub unsigned char
-#define vsb signed char
-
-#define vuw unsigned short int
-#define vsw signed short int
-
-#define vud unsigned long
-#define vsd signed long
-
-
-void checkAllEvents(void);
-
-
-#ifdef PROTORABBIT
-#define VLISP_HARDWARE "NAB2"
-#define NBLED 15
-#define VL_MOTORS
-#define VL_MUSIC
-#define VL_3STATE
-#define NBMOTOR 2
-#endif
-
-#ifdef PROTODAL
-#define VLISP_HARDWARE "4"
-#define NBLED 27
-#define VL_PRESS
-#endif
-
-#ifdef VMICROCHIP
-int simuInit(){ return 0;}
-int simuDoLoop(){ return 0;}
-void simuSetLed(vub i,vub val){}
-void simuSetMotor(vub i,vub val){}
-
-#else
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<time.h>
-#include <ncurses.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include  <ncurses.h>
 
 #include "linux_simuaudio.h"
 #include "linux_simunet.h"
 #include "log.h"
+#include "linux_simu.h"
 
-// définition de l'échelle d'affichage de la simulation
-#define SCALE 2
-
-#define NBHOLES 20
-#define MASKEDHOLES 3
-// MAXMOTORVAL doit être inférieur à 256
-#define MAXMOTORVAL 100
-
-int motorwheel[256];
-
-// gestion des couleurs
-// ---------------------
-uchar coloradd[256*256];
-uchar colormul[256*256];
-
-#define COLORADD(x,y) (coloradd[(x)+((y)<<8)])
-#define COLORMUL(x,y) (colormul[(x)+((y)<<8)])
-
-#define RGBTOINT(r,g,b) (( (((int)r)&255)<<16)+((((int)g)&255)<<8)+(((int)b)&255))
-#define INTTOR(c) ((c>>16)&255)
-#define INTTOG(c) ((c>>8)&255)
-#define INTTOB(c) (c&255)
-
-// initialisation des tables de couleur
-void colortabInit()
-{
-	int i,j,k;
-
-	for(i=0;i<256;i++)
-		for(j=0;j<256;j++)
-		{
-			k=i+j;
-			coloradd[i+(j<<8)]=(k<=255)?k:255;
-
-			k=i*j/255;
-			colormul[i+(j<<8)]=k;
-		}
-}
-
-// définition physique des leds
-
-// en fait il y a NBLED/3 leds, mais on en met 3 fois plus pour
-// pouvoir séparer chacune des composantes rgb de la couleur de chaque
-// led
+// LEDs
 int diodeval[NBLED];
+int diodepos[NBLED/3][2];
+int detaildiodepos[2];
+
+// Ncurses des LEDs
 WINDOW * window_local;
+
+// Ncurses couleurs
+int ncurses_color[7][3]= {
+	{255,255,255}, // Blanc
+	{0,0,0}, // Noir
+	{255,0,0}, // Rouge
+	{0,0,255}, // Bleu
+	{0,255,0}, // Vert
+	{255,128,0}, // Violet
+	{255,0,255} // Cyan
+};
+
+// Moteurs
 #ifdef VL_MOTORS
+int motorwheel[256];
 int motorval[NBMOTOR];
 int motorcount[NBMOTOR];
 int motordir[NBMOTOR];
 #endif
 
-int xclicsimu=-1;
-int yclicsimu=-1;
-int rclicsimu=0;
-int movesimu=0;
+int getButton() {
+	return 0;
+}
 
-int lastmovex=0;
-int lastmovey=0;
-
-#ifdef PROTORABBIT
-int diodex[NBLED]={80,80,80,40,40,40,80,80,80,120,120,120,80,80,80};
-int diodey[NBLED]={40,40,40,90,90,90,90,90,90,90,90,90,130,130,130};
-int diodergb[NBLED]=
-{0x0000ff,0x00ff00,0xff0000,
-0x0000ff,0x00ff00,0xff0000,
-0x0000ff,0x00ff00,0xff0000,
-0x0000ff,0x00ff00,0xff0000,
-0x0000ff,0x00ff00,0xff0000
-};
-#endif
-
-#ifdef PROTODAL
-int diodex[NBLED]={40,40,40,80,80,80,120,120,120,40,40,40,80,80,80,120,120,120,40,40,40,80,80,80,120,120,120};
-int diodey[NBLED]={40,40,40,40,40,40,40,40,40,80,80,80,80,80,80,80,80,80,120,120,120,120,120,120,120,120,120};
-int diodergb[NBLED]=
-{0x0000ff,0x00ff00,0xff0000,
-0x0000ff,0x00ff00,0xff0000,
-0x0000ff,0x00ff00,0xff0000,
-0x0000ff,0x00ff00,0xff0000,
-0x0000ff,0x00ff00,0xff0000,
-0x0000ff,0x00ff00,0xff0000,
-0x0000ff,0x00ff00,0xff0000,
-0x0000ff,0x00ff00,0xff0000,
-0x0000ff,0x00ff00,0xff0000
-};
-#endif
-
-
-// TODO
-int getButton() { return 0; }
+int round_256(int val) {
+	if ( val - 128 > 64 )
+		val = 255;
+	else if ( val - 128 > 0 || val - 192 > -64 )
+		val = 128;
+	else
+		val = 0;
+	return val;
+}
 
 int select_color(int a,int b,int c){
 	int i;
-int color[7][3]= {{255,255,255},
-	{0,0,0},
-	{255,0,0},
-	{0,0,255},
-	{0,255,0},
-	{255,128,0},
-	{255,0,255}};
-	if ( a - 128 > 64 )
-		a = 255;
-	else if ( a - 128 > 0 || a - 192 > -64 )
-		a = 128;
-	else
-		a=0;
-	if ( b - 128 > 64 )
-		b = 255;
-	else if ( b - 128 > 0 || b - 192 > -64 )
-		b = 128;
-	else
-		b=0;
-	if ( c - 128 > 64 )
-		c = 255;
-	else if ( c - 128 > 0 || c - 192 > -64 )
-		c = 128;
-	else
-		c=0;
+	a = round_256(a);
+	b = round_256(b);
+	c = round_256(c);
 	for ( i = 0; i < 7; i++ ) {
-		if ( a == color[i][0] && b == color[i][1] && c == color[i][2] ) {
+		if ( a == ncurses_color[i][0] && \
+                     b == ncurses_color[i][1] && \
+                     c == ncurses_color[i][2] ) {
 			return i+1;
 		}
 	}
@@ -182,48 +68,52 @@ int color[7][3]= {{255,255,255},
 // fonction d'affichage des diodes
 int simuDisplay(int* intensity)
 {
-    int startx = 50 / 2 - 30 / 2;
-    int starty = 2;
-mvwprintw(window_local,starty+0,startx,"     \\\\     ______    //      "); 
-mvwprintw(window_local,starty+1,startx,"      \\\\   /      \\  //       ");
-mvwprintw(window_local,starty+2,startx,"       \\\\ /        \\//        ");
-mvwprintw(window_local,starty+3,startx,"         /          \\         ");
-mvwprintw(window_local,starty+4,startx,"        /    ");
-wattron(window_local,COLOR_PAIR(select_color(diodeval[3*0],diodeval[3*0+1],diodeval[3*0+2])));
-wprintw(window_local,"   ");
-wattroff(window_local,COLOR_PAIR(select_color(diodeval[3*0],diodeval[3*0+1],diodeval[3*0+2])));
-wprintw(window_local,"     \\        ");
-mvwprintw(window_local,starty+5,startx,"       /              \\       ");
-mvwprintw(window_local,starty+6,startx,"      /                \\      ");
-mvwprintw(window_local,starty+7,startx,"     /                  \\     ");
-mvwprintw(window_local,starty+8,startx,"    /                    \\    ");
-mvwprintw(window_local,starty+9,startx,"   /  ");
-wattron(window_local,COLOR_PAIR(select_color(diodeval[3*1],diodeval[3*1+1],diodeval[3*1+2])));
-wprintw(window_local,"   ");
-wattroff(window_local,COLOR_PAIR(select_color(diodeval[3*1],diodeval[3*1+1],diodeval[3*1+2])));
-wprintw(window_local,"    ");
-wattron(window_local,COLOR_PAIR(select_color(diodeval[3*2],diodeval[3*2+1],diodeval[3*2+2])));
-wprintw(window_local,"   ");
-wattroff(window_local,COLOR_PAIR(select_color(diodeval[3*2],diodeval[3*2+1],diodeval[3*2+2])));
-wprintw(window_local,"     ");
-wattron(window_local,COLOR_PAIR(select_color(diodeval[3*3],diodeval[3*3+1],diodeval[3*3+2])));
-wprintw(window_local,"   ");
-wattroff(window_local,COLOR_PAIR(select_color(diodeval[3*3],diodeval[3*3+1],diodeval[3*3+2])));
-wprintw(window_local,"  \\   ");
-mvwprintw(window_local,starty+10,startx,"  /                        \\  ");
-mvwprintw(window_local,starty+11,startx," /                          \\ ");
-mvwprintw(window_local,starty+12,startx,"------------------------------");
-mvwprintw(window_local,starty+13,startx,"            ");
-wattron(window_local,COLOR_PAIR(select_color(diodeval[3*4],diodeval[3*4+1],diodeval[3*4+2])));
-wprintw(window_local,"     ");
-wattroff(window_local,COLOR_PAIR(select_color(diodeval[3*4],diodeval[3*4+1],diodeval[3*4+2])));
-mvwprintw(window_local,starty+16,startx,"couleur nez : %03d, %03d, %03d",diodeval[3*0],diodeval[3*0+1],diodeval[3*0+2]);
-mvwprintw(window_local,starty+17,startx,"couleur gauche : %03d, %03d, %03d",diodeval[3*1],diodeval[3*1+1],diodeval[3*1+2]);
-mvwprintw(window_local,starty+18,startx,"couleur milieu : %03d, %03d, %03d",diodeval[3*2],diodeval[3*2+1],diodeval[3*2+2]);
-mvwprintw(window_local,starty+19,startx,"couleur droit : %03d, %03d, %03d",diodeval[3*3],diodeval[3*3+1],diodeval[3*3+2]);
-mvwprintw(window_local,starty+20,startx,"couleur base : %03d, %03d, %03d",diodeval[3*4],diodeval[3*4+1],diodeval[3*4+2]);
-    wrefresh(window_local);
+	int i;
+	for (i = 0;i < NBLED/3;i++ ){
+		wattron(window_local,COLOR_PAIR(select_color(diodeval[3*i],diodeval[3*i+1],diodeval[3*i+2])));
+		mvwprintw(window_local,diodepos[i][1],diodepos[i][0],"   ");
+		wattroff(window_local,COLOR_PAIR(select_color(diodeval[3*i],diodeval[3*i+1],diodeval[3*i+2])));
+		mvwprintw(window_local,detaildiodepos[1]+i,detaildiodepos[0],"%03d, %03d, %03d",diodeval[3*i],diodeval[3*i+1],diodeval[3*i+2]);
+	}
+	wrefresh(window_local);
 	return 0;
+}
+
+void print_dessin(int x, int y) {
+	mvwprintw(window_local,y+ 0,x,"     \\\\     ______    //");
+	mvwprintw(window_local,y+ 1,x,"      \\\\   /      \\  //");
+	mvwprintw(window_local,y+ 2,x,"       \\\\ /        \\//");
+	mvwprintw(window_local,y+ 3,x,"         /          \\");
+	mvwprintw(window_local,y+ 4,x,"        /            \\");
+	mvwprintw(window_local,y+ 5,x,"       /              \\");
+	mvwprintw(window_local,y+ 6,x,"      /                \\");
+	mvwprintw(window_local,y+ 7,x,"     /                  \\");
+	mvwprintw(window_local,y+ 8,x,"    /                    \\");
+	mvwprintw(window_local,y+ 9,x,"   /                      \\");
+	mvwprintw(window_local,y+10,x,"  /                        \\");
+	mvwprintw(window_local,y+11,x," /                          \\");
+	mvwprintw(window_local,y+12,x,"------------------------------");
+	mvwprintw(window_local,y+16,x," couleur nez    :");
+	mvwprintw(window_local,y+17,x," couleur gauche :");
+	mvwprintw(window_local,y+18,x," couleur milieu :");
+	mvwprintw(window_local,y+19,x," couleur droite :");
+	mvwprintw(window_local,y+20,x," couleur base   :");
+
+	diodepos[0][0] = x + 13;
+	diodepos[0][1] = y + 4;
+	diodepos[1][0] = x + 7;
+	diodepos[1][1] = y + 9;
+	diodepos[2][0] = x + 13;
+	diodepos[2][1] = y + 9;
+	diodepos[3][0] = x + 19;
+	diodepos[3][1] = y + 9;
+	diodepos[4][0] = x + 13;
+	diodepos[4][1] = y + 13;
+
+	detaildiodepos[0] = x + 16;
+	detaildiodepos[1] = y + 16;
+
+	return ;
 }
 
 int simuDisplayInit(void) {
@@ -242,16 +132,16 @@ int simuDisplayInit(void) {
     window_local = newwin(30, 50, 0, 0);
     refresh();
     box(window_local,0,0);
+    print_dessin(50 / 2 - 30 / 2,2);
     return 0;
 }
 
 // initialisation du simulateur
-vsd simuInit()
+long simuInit()
 {
 	int i;
-	colortabInit();
 
-	for(i=0;i<NBLED*3;i++) diodeval[i]=255;
+	for(i=0;i<NBLED;i++) diodeval[i]=255;
 	srand(clock());
 #ifdef VL_MOTORS
 	for(i=0;i<NBMOTOR;i++)
@@ -275,8 +165,17 @@ vsd simuInit()
 
 
 
+/**
+	 Vérifie tous les évènements et fait les actions appropriées
+ */
+void checkAllEvents(void)
+{
+	checkNetworkEvents();
+	 simuFetch();
+}
+
 // fonction à appeler régulièrement, pour traiter les messages de la fenêtre du simulateur
-vsd simuDoLoop()
+long simuDoLoop()
 {
 #ifdef VL_MOTORS
 	int i,last;
@@ -298,15 +197,6 @@ vsd simuDoLoop()
 	return 0;
 }
 
-
-/**
-	 Vérifie tous les évènements et fait les actions appropriées
- */
-void checkAllEvents(void)
-{
-	checkNetworkEvents();
-	 simuFetch();
-}
 
 
 // réglagle d'une led
@@ -365,4 +255,3 @@ char* get_rfid()
 	// TODO
 	return NULL;
 }
-#endif

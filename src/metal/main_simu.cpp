@@ -2,7 +2,7 @@
 // Lowcost IS Powerfull
 
 
-// #define DUMPBC
+// define DUMPBC
 
 #define MAXSIZE_BYTECODE (128*1024)
 
@@ -58,7 +58,7 @@ void dump(uchar *src,int len)
 }
 
 
-void loadbytecode(char *src)
+void loadbytecode(const char *src)
 {
 	FILE *f;
 	int i,n;
@@ -90,8 +90,6 @@ void loadbytecode(char *src)
 
 
 int vcompDoit(char *starter);
-
-extern unsigned char dumpbc[];
 
 int main(int argc,char **argv)
 {
@@ -131,41 +129,46 @@ int main(int argc,char **argv)
 	write(filename,PropGet("URL"),sizeof(char)*strlen(PropGet("URL")));
 	write(filename,"\0",sizeof(char));
 	close(filename);
-
-	if (!vcompDoit(PropGet("SOURCE")))
-	{
-		loadbytecode("Simu_Work/bootc_simu");
-
-		vmemInit(0);
-
-		if (!strcmp(PropGet("BOOT"),"firmware"))
-		{
-			loaderInit((char*)dumpbc);
+	
+	if ( !strcmp(PropGet("SOURCE"),"")) {
+		if ( access ("Simu_Work/bootc_simu" , F_OK) == -1 ) {
+			printf("Fichier Simu_Work/bootc_simu introuvable, SOURCE non specifiee.\n");
+			return -1;
 		}
-		else
-		{
-			loaderInit(srcbytecode);
+	} else {
+		if (vcompDoit(PropGet("SOURCE"))) {
+			printf("Erreur de compilation.\n");
+			return -1;
 		}
-		vmemDumpShort();
-		getchar();
-
-
-		simuInit();
-
-		VPUSH(INTTOVAL(0));
-		interpGo();
-		VPULL();
-		while(1)
-		{
-			simuDoLoop();
-			VPUSH(VCALLSTACKGET(sys_start,SYS_CBLOOP));
-			if (VSTACKGET(0)!=NIL) interpGo();
-			VPULL();
-
-			usleep(50 * 1000);
-		}
-		getchar();
 	}
+
+	loadbytecode("Simu_Work/bootc_simu");
+
+	vmemInit(0);
+
+	loaderInit(srcbytecode);
+
+	vmemDumpShort();
+	getchar();
+
+	simuInit();
+
+	VPUSH(INTTOVAL(0));
+	interpGo();
+	VPULL();
+
+	while(1)
+	{
+		simuDoLoop();
+		VPUSH(VCALLSTACKGET(sys_start,SYS_CBLOOP));
+		if (VSTACKGET(0)!=NIL) interpGo();
+		VPULL();
+
+		usleep(50 * 1000);
+	}
+
+	getchar();
+	
 	return 0;
 }
 

@@ -15,11 +15,8 @@
 #include "vmem.h"
 #include "vloader.h"
 #include "vinterp.h"
-
+#include "linux_simunet.h"
 #include "log.h"
-
-#define TCPMAX 128 // nombre max de sockets tcp pouvant être ouvertes en même temps
-#define UDPMAX 128 // nombre max de sockets udp pouvant être ouvertes en même temps
 
 int tcp_sock[TCPMAX];	// =-1 -> disponible
 int tcp_enable[TCPMAX];
@@ -30,30 +27,9 @@ int udp_sock[UDPMAX];
 int udp_port[UDPMAX]; // port=0 -> disponible
 
 
-// déclarations
-int inet_addr_bin(char *ip);
-int simunetinit(void);
-int checkNetworkEvents(void);
-int checkTcpEvents(void);
-int tcpEventRead(int fd);
-int tcpEventWrite(int fd);
-int tcpbysock(int s);
-int tcpgetfree(void);
-int tcpopen(char* dstip,int dstport);
-int tcpclose(int i);
-void tcpenable(int i,int enable);
-int tcpsend(int i,char* msg, int len);
-int tcpservercreate(int port);
-int udpbyport(int p);
-int udpgetfree(void);
-int udpbysock(int s);
-int udpcreate(int port);
-int udpclose(int port);
-int udpsend(int localport,char* dstip,int dstport,char* msg, int len);
-int checkUdpEvents();
-int udpEventRead(int fd);
-
-
+/**
+	helper ...
+*/
 void helper_write_buffer(char *buf, int res)
 {
 	if (res <= 0)
@@ -74,7 +50,6 @@ void helper_write_buffer(char *buf, int res)
 	my_printf(LOG_SIMUNET, "%.2048s\n", printable);
 	my_printf(LOG_SIMUNET, "<<<<<<< end of buffer content\n");
 }
-
 
 
 /**
@@ -102,7 +77,6 @@ int simunetinit(void)
 	return 0;
 }
 
-int checkTcpEvents(void);
 
 /**
 	 Vérifie les évènements qui se sont produits sur les socket ouvertes et
@@ -119,12 +93,13 @@ int checkNetworkEvents(void)
 	return 0;
 }
 
+
 /////////////// TCP /////////////////
 
-int tcpEventRead(int fd);
-int tcpEventWrite(int fd);
-int tcpbysock(int s);
 
+/**
+	CheckTCPEvents
+ */
 int checkTcpEvents(void)
 {
 	fd_set fdset_r, fdset_w, fdset_err;
@@ -183,6 +158,7 @@ int checkTcpEvents(void)
 
 	return 0;
 }
+
 
 /**
 	 Gère un evt read sur une socket
@@ -275,6 +251,7 @@ int tcpEventRead(int fd)
 	}
 }
 
+
 /**
 	 Gère un evt write sur une socket
  */
@@ -299,6 +276,7 @@ int tcpEventWrite(int fd)
 	return 1;
 }
 
+
 /**
 	 Retrouve l'indice d'une socket dans le tableau tcp_sock
  */
@@ -308,6 +286,7 @@ int tcpbysock(int s)
 	for(i=0;i<TCPMAX;i++) if (tcp_sock[i]==s) return i;
 	return -1;
 }
+
 
 /**
 	 Renvoie l'indice du premier emplacement libre (socket pas en cours
@@ -324,6 +303,7 @@ int tcpgetfree(void)
 	}
 	return -1;
 }
+
 
 /**
 	 Ouvre une connection tcp
@@ -363,6 +343,7 @@ int tcpopen(char* dstip,int dstport)
 	return i;
 }
 
+
 /**
 	 Ferme une connection tcp
  */
@@ -376,6 +357,7 @@ int tcpclose(int i)
 	}
 	return i;
 }
+
 
 /**
 	 ?
@@ -413,6 +395,7 @@ int tcpsend(int i,char* msg, int len)
 	}
 	return -1;
 }
+
 
 /**
 	 Ouvre le port spécifié et attend des connections dessus
@@ -457,6 +440,10 @@ int tcpservercreate(int port)
 
 /////////////// UDP /////////////////
 
+
+/**
+	UDPByPort
+ */
 int udpbyport(int p)
 {
 	int i;
@@ -464,11 +451,19 @@ int udpbyport(int p)
 	return -1;
 }
 
+
+/**
+	UDPGetFree
+ */
 int udpgetfree(void)
 {
 	return udpbyport(0);
 }
 
+
+/**
+	UDPBySock
+ */
 int udpbysock(int s)
 {
 	int i;
@@ -476,6 +471,10 @@ int udpbysock(int s)
 	return -1;
 }
 
+
+/**
+	UDPCreate
+ */
 int udpcreate(int port)
 {
 	int sockudp;
@@ -509,6 +508,10 @@ int udpcreate(int port)
 	return i;
 }
 
+
+/**
+	UDPClose
+*/
 int udpclose(int port)
 {
 	int i=udpbyport(port);
@@ -520,6 +523,10 @@ int udpclose(int port)
 	return i;
 }
 
+
+/**
+	UDPSend
+*/
 int udpsend(int localport,char* dstip,int dstport,char* msg, int len)
 {
 	struct sockaddr_in ina;
@@ -552,7 +559,9 @@ int udpsend(int localport,char* dstip,int dstport,char* msg, int len)
 }
 
 
-
+/**
+	CheckUDPEvents
+*/
 int checkUdpEvents(void)
 {
 	fd_set fdset_r, fdset_w, fdset_err;
@@ -599,6 +608,10 @@ int checkUdpEvents(void)
 	return 0;
 }
 
+
+/**
+	UDPEventRead
+*/
 int udpEventRead(int fd)
 {
 	char buf[4096];

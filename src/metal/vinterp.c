@@ -6,13 +6,9 @@
 #include"vinterp.h"
 #include"vlog.h"
 #include"vaudio.h"
-#ifdef VSIMU
 #include<stdio.h>
 #include<string.h>
-#include"simunet.h"
-#else
-#include "common.h"
-#endif
+#include "linux_simunet.h"
 #include"vnet.h"
 
 /*
@@ -860,7 +856,6 @@ void interpGo()
 			case OPloopcb:
 				VCALLSTACKSET(sys_start,SYS_CBLOOP,VSTACKGET(0));
 				break;
-#ifdef VSIMU
 			case OPudpStart:
 				VSTACKSET(0,INTTOVAL(udpcreate(VALTOINT(VSTACKGET(0)))));
 				break;
@@ -942,7 +937,6 @@ void interpGo()
 					tcpenable(VALTOINT(VSTACKGET(0)),enable);
 				}
 				break;
-#endif
 			case OPSecholn:
 				logSecho(VSTACKGET(0),1);
 				//                          if (tron)dump(&bytecode[0x2440],32);

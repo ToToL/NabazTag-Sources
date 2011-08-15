@@ -37,7 +37,7 @@ void dump(uchar *src,int len)
 }
 
 
-void loadbytecode(char *src)
+void loadbytecode(const char *src)
 {
 	FILE *f;
 	int i,n;
@@ -71,8 +71,6 @@ void loadbytecode(char *src)
 
 
 int StartMetal(const char *starter, const char* output, bool inSign);
-
-extern unsigned char dumpbc[];
 
 void usage(char* inProgram) {
 	printf("Syntaxe: %s [-s] source output\n", inProgram);

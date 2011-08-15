@@ -4,31 +4,14 @@
 #ifndef _MEMORY_
 #define _MEMORY_
 
-// #define VSIMU /// défini dans le Makefile : -DVSIMU
-//#define VREAL
-
 // taille en mots 32 bits (128kwords -> 512ko)
-//#define VMEM_LENGTH	(1024*200)
 #define VMEM_LENGTH	(1024*200)
 #define VMEM_GCTHRESHOLD 16
 
-#ifdef VREAL
-#include<stdio.h>
-#include<string.h>
-#include "uart.h"
-#endif
-
-#ifdef VSIMU
 extern int vmem_heap[VMEM_LENGTH];
 #define ENDLINE "\n"
 #define uchar unsigned char
 #define CLR_WDT
-
-#endif
-#ifdef VREAL
-#define vmem_heap ((int*)(0xD0010000))
-#define ENDLINE "\r\n"
-#endif
 
 void dump(uchar *src,int len);
 

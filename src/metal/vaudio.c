@@ -5,21 +5,14 @@
 
 #include <string.h>
 
-#ifdef VSIMU
 #include<stdio.h>
 #include<time.h>
-#endif
 
 #include"vloader.h"
 #include"vinterp.h"
 #include"vaudio.h"
 
-#ifdef VSIMU
 #include"linux_simuaudio.h"
-#endif
-#ifdef VREAL
-#include"audio.h"
-#endif
 
 char audioFifoPlay[AUDIO_FIFOPLAY];
 
@@ -34,27 +27,15 @@ void audioInit()
 void audioPlayStart(int freq,int bps,int stereo,int trytofeed)
 {
 	play_w=play_r=0;
-#ifdef VSIMU
 	PlayStart(freq,stereo,44100,bps,3);
-#endif
-#ifdef VREAL
-	//      set_vlsi_volume(get_adc_value()/2);          //volume on 8bits, 0x00 => maximum
-	play_start(trytofeed);
-#endif
 }
 
 int audioPlayFeed(char *src,int len)
 {
-	//#ifdef VSIMU
 	int i_end;
 	if (!src)
 	{
-#ifdef VSIMU
 		PlayEof();
-#endif
-#ifdef VREAL
-        play_eof();
-#endif
 		return 0;
 	}
 	i_end=play_r-1;
@@ -78,24 +59,11 @@ int audioPlayFeed(char *src,int len)
 	if (i_end) memcpy(audioFifoPlay,src,i_end);
 	play_w=i_end;
 	return len+i_end;
-	//#endif
-	/*
-	#ifdef VREAL
-	set_vlsi_volume(get_adc_value()/2);          //volume on 8bits, 0x00 => maximum
-	//Play file
-	play_audio((UBYTE*)src,len);
-	#endif
-	*/
 }
 
 void audioPlayStop()
 {
-#ifdef VSIMU
 	PlayStop();
-#endif
-#ifdef VREAL
-	play_stop();
-#endif
 }
 
 int audioPlayTryFeed(int ask)
@@ -153,46 +121,26 @@ int audioPlayFetch(char* dst,int ask)
 
 void audioVol(int vol)
 {
-#ifdef VSIMU
 //	printf("xxxx audioVol %d\n",vol);
 
 	audioSetVolume(255-vol);
-#endif
-#ifdef VREAL
-	set_vlsi_volume((vol&255)/2);
-#endif
 }
 
 int audioPlayTime()
 {
-#ifdef VSIMU
 	printf("xxxx audioPlayTime\n");
 	return 0;
-#endif
-#ifdef VREAL
-	return check_decode_time();
-#endif
 }
 
 int audioRecStart(int freq,int gain)
 {
-#ifdef VSIMU
 	RecStart(freq,505,4);
-#endif
-#ifdef VREAL
-	rec_start(freq,gain);
-#endif
 	return 0;
 }
 
 int audioRecStop()
 {
-#ifdef VSIMU
 	RecStop();
-#endif
-#ifdef VREAL
-	rec_stop();
-#endif
 	return 0;
 }
 
@@ -628,50 +576,23 @@ void AudioAlaw2wav(char* dst,int idst,int ldst,char *src,int isrc,int lsrc,int l
 
 void audioWrite(int reg,int val)
 {
-#ifdef VSIMU
 	printf("xxxx audioWrite %d %d\n",reg,val);
-#endif
-#ifdef VREAL
-	vlsi_write_sci(reg,val);
-#endif
 }
 int audioRead(int reg)
 {
-#ifdef VSIMU
 	printf("xxxx audioRead %d\n",reg);
 	return 0;
-#endif
-#ifdef VREAL
-	if (reg==-1) return vlsi_fifo_ready();
-	return vlsi_read_sci(reg);
-#endif
 }
 int audioFeed(char *src,int len)
 {
-#ifdef VSIMU
 	printf("xxxx audioFeed %d\n",len);
 	return 0;
-#endif
-#ifdef VREAL
-	return vlsi_feed_sdi((uchar*)src,len);
-#endif
 }
 void audioRefresh()
 {
-#ifdef VSIMU
 	printf("xxxx audioRefresh\n");
-#endif
-#ifdef VREAL
-	play_check(0);
-	rec_check();
-#endif
 }
 void audioAmpli(int on)
 {
-#ifdef VSIMU
 	printf("xxxx audioAmpli %d\n",on);
-#endif
-#ifdef VREAL
-	vlsi_ampli(on);
-#endif
 }

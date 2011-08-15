@@ -1,34 +1,34 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
 #include <sys/stat.h>
 
 #include "log.h"
-
-#define A() my_printf(LOG_SIMUAUDIO, "[[%s]]\n", __func__);
+#include "linux_simuaudio.h"
 
 int PlayState;
 int PlayStateEof;
 int PlayType;
 
-#define PLAYST_IDLE 0
-#define PLAYST_START 1
-#define PLAYST_PLAY 2
-
-#define PLAYTYPE_MP3 0
-#define PLAYTYPE_WAV 1
-#define PLAYTYPE_ADPCM 2
-
-#define BUFMP3IN_LENGTH 65536
-
 char bufplayin[BUFMP3IN_LENGTH];
 
 FILE * printmp3;
 
-int RecStart(int rate,int ChannelSize,int nbBuffers) { A(); return 0; }
-int RecStop() { A(); return 0; }
+int RecStart(int rate,int ChannelSize,int nbBuffers) {
+	A();
+	return 0;
+}
 
-void audioSetVolume(int vol) { A(); return ; }
+int RecStop() {
+	A();
+	return 0;
+}
+
+void audioSetVolume(int vol) {
+	A();
+	return ;
+}
 
 int PlayStop()
 {
@@ -65,17 +65,18 @@ void simuFetchStart()
 	mkdir("Simu_Work/mp3", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
        	tii = time(NULL);
        	ti = localtime(&tii);
-       	sprintf(buff,"Simu_Work/%d%d%d%d%d%d.mp3",ti->tm_year,
+       	sprintf(buff,"Simu_Work/mp3/%d%d%d%d%d%d.mp3",ti->tm_year,
                                                  ti->tm_mon,
                                                  ti->tm_mday,
                                                  ti->tm_hour,
                                                  ti->tm_min,
                                                  ti->tm_sec);
-       	free(ti);
        	printmp3 = fopen(buff,"a+");
 	PlayType=PLAYTYPE_MP3;
 	my_printf(LOG_SIMUAUDIO,"Detect MP3\n");
 	PlayState=PLAYST_PLAY;
+
+	return ;
 }
 
 int simuFetchPlay(void)
@@ -110,4 +111,5 @@ int PlayStart()
 	A();
 	PlayState=PLAYST_START;
 	PlayStateEof=0;
+	return 0;
 }
