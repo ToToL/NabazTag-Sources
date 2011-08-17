@@ -56,8 +56,8 @@ void WMOTOR_Base(int y, int x) {
 }
 
 int WMOTOR_Init(void) {
-    window_MOTOR = newwin(7, 40, 34, 2);
-    wattron(window_MOTOR,A_BOLD);
+    window_MOTOR = newwin(7, 40, 26, 2);
+//    wattron(window_MOTOR,A_BOLD);
     refresh();
     box(window_MOTOR,0,0);
     WMOTOR_Base(3,40/2 - 34/2);

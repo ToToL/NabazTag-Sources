@@ -133,8 +133,8 @@ int simuLedInit(void) {
 
 int WLED_Init(void) {
 
-    window_LED = newwin(25, 40, 8, 2);
-    wattron(window_LED,A_BOLD);
+    window_LED = newwin(25, 40, 0, 2);
+//    wattron(window_LED,A_BOLD);
     refresh();
     box(window_LED,0,0);
     WLED_Base(3,40 / 2 - 30 / 2);

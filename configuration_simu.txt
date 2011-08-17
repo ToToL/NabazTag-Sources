@@ -2,6 +2,7 @@ SOURCE Simu_Work/nominal_simu.mtl
 MAC 0013d384958c
 LOGS init,vm,simunet,simuleds,simuaudio,simumotors
 LOGFILE Simu_Work/simu.logs
+DOLOGTIME 1
 XMPPPORT 5223
 DNS 192.168.0.30
 IP 192.168.0.30

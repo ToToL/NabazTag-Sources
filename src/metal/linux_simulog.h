@@ -4,5 +4,6 @@
 void WLOG_Display(void);
 void WLOG_Add(int log, const char * buff);
 int WLOG_Init(void);
+int simuKeys(void);
 
 #endif

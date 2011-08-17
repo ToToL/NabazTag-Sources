@@ -15,12 +15,14 @@ int getButton() {
 	return 0;
 }
 
+WINDOW * general_scr;
+
 /***************************
  * La fenetre en general
  ***************************/
 
 int simuDisplayInit(void) {
-    initscr();
+    general_scr = initscr();
     start_color();
     init_pair(1, COLOR_BLACK, COLOR_WHITE);
     init_pair(2, COLOR_BLACK, COLOR_BLACK);
@@ -32,6 +34,7 @@ int simuDisplayInit(void) {
     init_pair(8, COLOR_BLACK, COLOR_CYAN);
     noecho();
     cbreak();
+    nodelay(general_scr, 1);
     WLED_Init();
     WLOG_Init();
     WMOTOR_Init();
@@ -66,6 +69,7 @@ long simuDoLoop()
 	checkNetworkEvents();
 	simuFetch();
 	simuMotor();
+	simuKeys();
 	simuDisplay();
 	return 0;
 }
