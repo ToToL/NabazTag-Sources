@@ -11,11 +11,21 @@
 #include "linux_simulog.h"
 #include "linux_simumotor.h"
 
-int getButton() {
+WINDOW * general_scr;
+
+char buf_rfid[256];
+
+int get_button3()
+{
+	// TODO
 	return 0;
 }
 
-WINDOW * general_scr;
+char* get_rfid()
+{
+	// TODO
+	return NULL;
+}
 
 /***************************
  * La fenetre en general
@@ -54,7 +64,6 @@ long simuInit()
 	int i;
 
 	srand(clock());
-//	setButton(1);
 	simuaudioinit();
 	simunetinit();
 	simuLedInit();
@@ -72,18 +81,4 @@ long simuDoLoop()
 	simuKeys();
 	simuDisplay();
 	return 0;
-}
-
-int get_button3()
-{
-	// TODO
-	return 0;
-}
-
-char buf_rfid[256];
-
-char* get_rfid()
-{
-	// TODO
-	return NULL;
 }

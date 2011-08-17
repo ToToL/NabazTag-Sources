@@ -34,6 +34,8 @@ int PlayStop()
 {
 	A();
 	PlayState=PLAYST_IDLE;
+	fclose(printmp3);
+	sleep(1);
 	return 0;
 }
 
@@ -48,6 +50,9 @@ int simuaudioinit()
 {
 	PlayState=PLAYST_IDLE;
 	PlayStateEof=1;
+	if ( access ( "Simu_Work/mp3" , F_OK ) != -1 )
+		system("rm -rf Simu_Work/mp3");
+	mkdir("Simu_Work/mp3", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	return 0;
 }
 
@@ -60,9 +65,6 @@ void simuFetchStart()
 
 	my_printf(LOG_SIMUAUDIO,"START\n");
 
-	if ( access ( "Simu_Work/mp3" , F_OK ) != -1 )
-		system("rm -rf Simu_Work/mp3");
-	mkdir("Simu_Work/mp3", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
        	tii = time(NULL);
        	ti = localtime(&tii);
        	sprintf(buff,"Simu_Work/mp3/%d%d%d%d%d%d.mp3",ti->tm_year,
@@ -84,12 +86,13 @@ int simuFetchPlay(void)
 	my_printf(LOG_SIMUAUDIO,"PLAY\n");
 	int len=BUFMP3IN_LENGTH;
 	if (len) len=audioPlayFetch(bufplayin,len);
-	my_printf(LOG_SIMUAUDIO,"simuFetchStart get=%d\n",len);
+	my_printf(LOG_SIMUAUDIO,"simuFetchPlay get=%d\n",len);
 
 	if (!len)
 	{
-		if (PlayStateEof) {PlayState=PLAYST_IDLE;
-			fclose(printmp3);}
+		if (PlayStateEof) {
+			PlayState=PLAYST_IDLE;
+		}
 		return;
 	}
 

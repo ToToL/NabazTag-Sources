@@ -17,6 +17,11 @@ WINDOW * window_INFO;
 
 int local_log_msk = LOG_INIT | LOG_VM | LOG_SIMUNET | LOG_SIMUAUDIO | LOG_SIMULEDS | LOG_SIMUMOTORS;
 int log_pos[2];
+int button_state = 0;
+
+int getButton() {
+	return button_state;
+}
 
 void WLOG_Display(void) {
 	if ( local_log_msk & LOG_INIT ) 
@@ -43,6 +48,10 @@ void WLOG_Display(void) {
 		mvwprintw(window_INFO,log_pos[1]+5,log_pos[0],"on ");
 	else
 		mvwprintw(window_INFO,log_pos[1]+5,log_pos[0],"off");
+	if ( getButton() )
+		mvwprintw(window_INFO,log_pos[1]+7,log_pos[0],"Enfonce");
+	else
+		mvwprintw(window_INFO,log_pos[1]+7,log_pos[0],"Relache");
 	wrefresh(window_LOG);
 	wrefresh(window_INFO);
 }
@@ -55,6 +64,7 @@ void WINFO_Base(int x , int y ) {
 	mvwprintw(window_INFO,y+5,x,"Logs Audio   :");
 	mvwprintw(window_INFO,y+6,x,"Logs LEDs    :");
 	mvwprintw(window_INFO,y+7,x,"Logs Moteurs :");
+	mvwprintw(window_INFO,y+9,x,"Bouton tetes :");
 	log_pos[0] = x+17;
 	log_pos[1] = y+2;
 	return;
@@ -114,5 +124,7 @@ int simuKeys(void) {
 			local_log_msk &= LOG_VM | LOG_SIMUNET | LOG_SIMUAUDIO | LOG_SIMULEDS | LOG_INIT;
 		else
 			local_log_msk |= LOG_SIMUMOTORS;
+	else if ( key == 'u' )
+		button_state = button_state?0:1;
 	return 0;
 }
