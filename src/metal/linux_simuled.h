@@ -1,8 +1,12 @@
 #ifndef _MY_SIMULED_H_
 #define _MY_SIMULED_H_
 
+#define NBLED 15
+
 // Colorer une LED
 void simuSetLed(int i,int val); 
+
+int simuLedInit(void);
 
 /******************************
  * Fenetre des LEDs du NabazTag

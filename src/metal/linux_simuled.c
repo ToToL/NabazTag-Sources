@@ -7,7 +7,6 @@
 #include "linux_simuaudio.h"
 #include "linux_simunet.h"
 #include "log.h"
-#include "linux_simu.h"
 #include "linux_simuled.h"
 
 // LEDs
@@ -40,9 +39,7 @@ void simuSetLed(int i,int val) {
 	my_printf(LOG_SIMULEDS, "Setting led %d: [%d %d %d]\n", i/3, diodeval[i], diodeval[i+1], diodeval[i+2]);
 	my_printf(LOG_SIMULEDS, "All leds state:", i/3, diodeval[i], diodeval[i+1], diodeval[i+2]);
 	for (i=0; i<NBLED/3; ++i)
-		{
-			my_printf(LOG_SIMULEDS, " [%3d %3d %3d]", diodeval[3*i], diodeval[3*i+1], diodeval[3*i+2]);
-		}
+		my_printf(LOG_SIMULEDS, " [%3d %3d %3d]", diodeval[3*i], diodeval[3*i+1], diodeval[3*i+2]);
 	my_printf(LOG_SIMULEDS, "\n");
 }
 
@@ -125,13 +122,18 @@ void WLED_Base(int y, int x) {
 	return ;
 }
 
-int WLED_Init(void) {
+int simuLedInit(void) {
     int i;
     
     for( i = 0 ; i < NBLED ; i++ )
         diodeval[i]=255;
+ 
+    return 0;
+}
 
-    window_LED = newwin(25, 40, 12, 2);
+int WLED_Init(void) {
+
+    window_LED = newwin(25, 40, 8, 2);
     wattron(window_LED,A_BOLD);
     refresh();
     box(window_LED,0,0);

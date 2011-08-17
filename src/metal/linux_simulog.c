@@ -7,7 +7,6 @@
 #include "linux_simuaudio.h"
 #include "linux_simunet.h"
 #include "log.h"
-#include "linux_simu.h"
 #include "linux_simuled.h"
 #include "properties.h"
 
