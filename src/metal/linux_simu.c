@@ -9,6 +9,7 @@
 #include "log.h"
 #include "linux_simu.h"
 #include "linux_simuled.h"
+#include "linux_simulog.h"
 
 // Moteurs
 #ifdef VL_MOTORS
@@ -40,11 +41,13 @@ int simuDisplayInit(void) {
     noecho();
     cbreak();
     WLED_Init();
+    WLOG_Init();
     return 0;
 }
 
 int simuDisplay(void){
     WLED_Display();
+    WLOG_Display();
     return 0;
 }
 

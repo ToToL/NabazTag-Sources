@@ -1,5 +1,7 @@
 #ifndef _LOG_H_
-# define _LOG_H_
+#define _LOG_H_
+
+#include <stdio.h>
 
 typedef enum {
 	LOG_INIT = 1,         // les messages écrits pendant l'init
@@ -16,5 +18,6 @@ int my_printf_set_logfile(const char *filename);
 void my_printf_set_max_log_size(int n);
 void my_printf_set_max_log_time(int n);
 void my_printf_set_do_log_time(int n);
+int PutsLog( FILE * f, int log, const char * buff);
 
 #endif // ! _LOG_H_

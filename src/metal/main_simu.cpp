@@ -17,6 +17,7 @@ extern "C" {
 #include"vinterp.h"
 #include"properties.h"
 #include "log.h"
+#include "linux_simulog.h"
 
 int simuInit();
 
@@ -257,4 +258,10 @@ void usage(char * bin_name)
 	       "          --maxlogtime <n>: specifie qu'il doit y avoir une rotation du fichier de log au moins toutes les <n> secondes\n" \
 	       "          --dologtime: specifie qu'on doit afficher sur chaque ligne de log le nombre de secondes ecoulees depuis le lancement du simulateur\n" \
 	       "Toutes les options sont prioritaires sur les valeurs contenues dans config.txt\n", bin_name);
+}
+
+int PutsLog( FILE * f, int log, const char * buff) {
+	WLOG_Add(log, buff);
+	return fprintf(f,buff);
+
 }

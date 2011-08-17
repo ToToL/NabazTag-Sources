@@ -131,7 +131,7 @@ int WLED_Init(void) {
     for( i = 0 ; i < NBLED ; i++ )
         diodeval[i]=255;
 
-    window_LED = newwin(25, 40, 0, 0);
+    window_LED = newwin(25, 40, 12, 2);
     wattron(window_LED,A_BOLD);
     refresh();
     box(window_LED,0,0);

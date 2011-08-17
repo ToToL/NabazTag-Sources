@@ -16,6 +16,11 @@ extern "C" {
 
 char srcbytecode[65536];
 
+int PutsLog( FILE * f, int log, const char * buff) {
+
+	return fprintf(f,buff);
+
+}
 
 void dump(uchar *src,int len)
 {
@@ -99,4 +104,3 @@ int main(int argc,char **argv)
 	StartMetal(source, output, signBinary);
 	return 0;
 }
-

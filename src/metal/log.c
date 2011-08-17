@@ -67,6 +67,7 @@ static int print_line_by_line(e_logtypes t, char *s, int force)
 	char *tmp;
 	int nbwritten=0;
 	char pfx[256];
+	char buff[2048];
 	if (do_log_time)
 		snprintf(pfx,255, "%06d %s", time(NULL) - time_first_log, get_prefix(t));
 	else
@@ -76,14 +77,21 @@ static int print_line_by_line(e_logtypes t, char *s, int force)
 			tmp = strchr(s, '\n');
 			if (NULL!=tmp) {
 				*tmp='\0';
-				current_log_size += fprintf(outstream, "[%s] %s\n", pfx, s);
+				sprintf(buff,"[%s] %s\n", pfx, s);
+				//current_log_size += fprintf(outstream, "[%s] %s\n", pfx, s);
+				current_log_size += PutsLog(outstream, t, buff);
+				//WLOG_Add(buff);
 				*tmp='\n';
 				nbwritten+=(tmp-s)+1;
 				s=tmp+1;
 			}
 			else {
 				if (force) {
-					current_log_size += fprintf(outstream, "[%s] %s\n", pfx, s);
+					sprintf(buff,"[%s] %s\n", pfx, s);
+					//current_log_size += fprintf(outstream, "[%s] %s\n", pfx, s);
+					current_log_size += PutsLog(outstream, t, buff);
+//				sprintf(buff,"[%s] %s\n", pfx, s);
+//				WLOG_Add(buff);
 					nbwritten+=strlen(s);
 				}
 				break;
