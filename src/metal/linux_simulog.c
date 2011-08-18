@@ -8,6 +8,7 @@
 #include "linux_simunet.h"
 #include "log.h"
 #include "linux_simuled.h"
+#include "linux_simumotor.h"
 #include "properties.h"
 
 // Ncurses des logs
@@ -18,6 +19,8 @@ WINDOW * window_INFO;
 int local_log_msk = LOG_INIT | LOG_VM | LOG_SIMUNET | LOG_SIMUAUDIO | LOG_SIMULEDS | LOG_SIMUMOTORS;
 int log_pos[2];
 int button_state = 0;
+int motor_dir_g = 0;
+int motor_dir_d = 0;
 
 int getButton() {
 	return button_state;
@@ -126,5 +129,33 @@ int simuKeys(void) {
 			local_log_msk |= LOG_SIMUMOTORS;
 	else if ( key == 'u' )
 		button_state = button_state?0:1;
+	else if ( key == 'o' ) {
+		if ( motor_dir_g == 0 )
+			motor_dir_g = -1;
+		else
+			motor_dir_g = 0;
+		set_motor_dir(0,motor_dir_g);
+		}
+	else if ( key == 'p' ) {
+		if ( motor_dir_g == 0 )
+			motor_dir_g = 1;
+		else
+			motor_dir_g = 0;
+		set_motor_dir(0,motor_dir_g);
+		}
+	else if ( key == 'l' ) {
+		if ( motor_dir_d == 0 )
+			motor_dir_d = -1;
+		else
+			motor_dir_d = 0;
+		set_motor_dir(1,motor_dir_d);
+		}
+	else if ( key == 'm' ) {
+		if ( motor_dir_d == 0 )
+			motor_dir_d = 1;
+		else
+			motor_dir_d = 0;
+		set_motor_dir(1,motor_dir_d);
+		}
 	return 0;
 }

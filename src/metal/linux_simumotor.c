@@ -30,7 +30,7 @@ void simuMotor(void) {
 		motorval[i]+=motordir[i];
 		if (motorval[i]<0)
 			motorval[i]=MAXMOTORVAL;
-		if (motorval[i]>=MAXMOTORVAL)
+		if (motorval[i]>MAXMOTORVAL)
 			motorval[i]=0;
 		if (last<motorwheel[motorval[i]]) motorcount[i]++;
 	}
@@ -38,8 +38,14 @@ void simuMotor(void) {
 }
 
 void WMOTOR_Display(void) {
-	mvwprintw(window_MOTOR,moteur[0][1],moteur[0][0],"sens : %d, val : %d",motordir[0],motorval[0]);
-	mvwprintw(window_MOTOR,moteur[1][1],moteur[1][0],"sens : %d, val : %d",motordir[1],motorval[1]);
+	if ( motordir[0] == -1 )
+		mvwprintw(window_MOTOR,moteur[0][1],moteur[0][0],"sens : %d, val : %03d",motordir[0],motorval[0]);
+	else	
+		mvwprintw(window_MOTOR,moteur[0][1],moteur[0][0],"sens :  %d, val : %03d",motordir[0],motorval[0]);
+	if ( motordir[1] == -1 ) 
+		mvwprintw(window_MOTOR,moteur[1][1],moteur[1][0],"sens : %d, val : %03d",motordir[1],motorval[1]);
+	else
+		mvwprintw(window_MOTOR,moteur[1][1],moteur[1][0],"sens :  %d, val : %03d",motordir[1],motorval[1]);
 	wrefresh(window_MOTOR);
 	return;
 }
@@ -60,7 +66,7 @@ int WMOTOR_Init(void) {
 //    wattron(window_MOTOR,A_BOLD);
     refresh();
     box(window_MOTOR,0,0);
-    WMOTOR_Base(3,40/2 - 34/2);
+    WMOTOR_Base(3,40/2 - 36/2);
     return 0;
 }
 
