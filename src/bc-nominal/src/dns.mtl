@@ -179,6 +179,8 @@ fun dnsremoveipfromcache iptoremove =
 //  domain: le domaine à rechercher
 //  cb: le callback à appeler
 fun dnsreq domain cb=
+        let strstr domain ":" 0 -> k in (
+                set domain= strsub domain 0 k);
 	Dnsw "dnsreq("; Secho domain; Secholn ")";
 	set dnsid=(if dnsid==nil then time_ms else (dnsid+1));
 	let listswitchstr ldns domain -> [ ip time_valid ] in
